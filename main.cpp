@@ -4,6 +4,7 @@
 
 using namespace std;
 const int BandWidth = 2000; // kbps
+const int gate = 1800;
 
 /**
  * init packet size
@@ -23,6 +24,12 @@ vector<int> init_packet(int kind, int business) {
     return packet;
 }
 
+/**
+ * get standard throughput
+ * @param pkt_size
+ * @param rate
+ * @return
+ */
 vector<double> get_standard_th(vector<int> pkt_size, int rate) {
     vector<double> throughput(pkt_size.size());
     for (int i = 0; i < pkt_size.size(); i++) {
@@ -31,6 +38,10 @@ vector<double> get_standard_th(vector<int> pkt_size, int rate) {
         throughput[i] -= 1 + random / 1000;
     }
     return throughput;
+}
+
+vector<double> solve_throughput(vector<double> throughput) {
+
 }
 
 /**
