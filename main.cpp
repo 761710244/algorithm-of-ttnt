@@ -47,6 +47,10 @@ vector<double> getStandardThroughPut(vector<int> pktSize, int rate) {
  * @return
  */
 vector<int> initWhich(int business, int neeToChange) {
+    if (neeToChange >= business) {
+        vector<int> flag(business, 1);
+        return flag;
+    }
     vector<int> flag(business, 0);
     for (int i = 0; i < neeToChange; i++) {
         int randomValue = rand() % business;
@@ -75,7 +79,7 @@ vector<double> solveThroughput(vector<double> throughput, int business) {
     }
     int randDecrease = rand() % 50;
     double distance = sum + randDecrease - gate;
-    int needToFix = (rand() % business) + 3;
+    int needToFix = (rand() % (business - 2)) + 3;
     double average = distance / (double) needToFix;
     vector<int> whichToChange = initWhich(business, needToFix);
     for (int i = 0; i < whichToChange.size(); i++) {
@@ -129,22 +133,41 @@ int getTopValue(vector<double> throughPut, int kind, int business) {
     return business;
 }
 
+double getDelayGate(vector<double> delay, int top) {
+    double sum = 0.000;
+    for (int i = 0; i < top; i++) {
+        sum += delay[i];
+    }
+    return sum;
+}
+
 vector<double> solveDelay(vector<double> delay, int business, int top) {
     if (business < top) {
         return delay;
     }
     int toFixBusiness = business - top + 1;
-    int start = 2;
+    double start = 1.1;
     while (toFixBusiness > 0) {
-        start *= 2;
+        start *= 1.2;
         toFixBusiness--;
+    }
+    double sum = getDelayGate(delay, top);
+    double standard = sum * start;
+    double distance = standard - sum;
+    int needToFix = (rand() % (business - 2)) + 3;
+    double average = distance / (double) needToFix;
+    vector<int> whichToChange = initWhich(business, needToFix);
+    for (int i = 0; i < whichToChange.size(); i++) {
+        if (whichToChange[i] == 1) {
+            delay[i] += average;
+        }
     }
     return delay;
 }
 
 int main() {
-    int kind = 3;
-    int business = 10;
+    int kind = 1;
+    int business = 30;
     int dataRate = 20; //  packets/s
     int nodeNum = kind * business * 2;
 
@@ -168,14 +191,18 @@ int main() {
     }
     cout << endl;
 
-
     int top = getTopValue(standardThroughPut, kind, business);
     cout << top << endl;
-
 
     standardThroughPut = solveThroughput(standardThroughPut, business);
     for (int i = 0; i < standardThroughPut.size(); i++) {
         cout << standardThroughPut[i] << " ";
+    }
+    cout << endl;
+
+    standardDelay = solveDelay(standardDelay, business, top);
+    for (int i = 0; i < standardDelay.size(); i++) {
+        cout << standardDelay[i] << " ";
     }
     cout << endl;
     return 0;
