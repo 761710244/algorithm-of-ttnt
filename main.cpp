@@ -208,23 +208,23 @@ int main() {
 
             //  get packet size of each business
             vector<int> packetSize = initPacket(kind, business);
-//    for (int i = 0; i < packetSize.size(); i++) {
-//        cout << packetSize[i] << " ";
-//    }
-//    cout << endl;
+            for (int i = 0; i < packetSize.size(); i++) {
+                cout << packetSize[i] << " ";
+            }
+            cout << endl;
 
             //  get standard delay of each business
             vector<double> standardDelay = getStandardDelay(packetSize);
-//    for (int i = 0; i < standardDelay.size(); i++) {
-//        cout << standardDelay[i] << " ";
-//    }
-//    cout << endl;
+            for (int i = 0; i < standardDelay.size(); i++) {
+                cout << standardDelay[i] << " ";
+            }
+            cout << endl;
 
             vector<double> standardThroughPut = getStandardThroughPut(packetSize, dataRate);
-//    for (int i = 0; i < standardThroughPut.size(); i++) {
-//        cout << standardThroughPut[i] << " ";
-//    }
-//    cout << endl;
+            for (int i = 0; i < standardThroughPut.size(); i++) {
+                cout << standardThroughPut[i] << " ";
+            }
+            cout << endl;
 
             vector<double> tmpThroughPut = standardThroughPut;
 
@@ -232,21 +232,24 @@ int main() {
             cout << top << endl;
 
             standardThroughPut = solveThroughput(standardThroughPut, business);
-//    for (int i = 0; i < standardThroughPut.size(); i++) {
-//        cout << standardThroughPut[i] << " ";
-//    }
-//    cout << endl;
+            for (int i = 0; i < standardThroughPut.size(); i++) {
+                cout << standardThroughPut[i] << " ";
+            }
+            cout << endl;
 
             standardDelay = solveDelay(standardDelay, business, top);
-//    for (int i = 0; i < standardDelay.size(); i++) {
-//        cout << standardDelay[i] << " ";
-//    }
-//    cout << endl;
+            for (int i = 0; i < standardDelay.size(); i++) {
+                cout << standardDelay[i] << " ";
+            }
+            cout << endl;
 
-            vector<int> receive = getReceivePackets(tmpThroughPut,standardThroughPut);
+            vector<int> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+            for (int i = 0; i < receive.size(); i++) {
+                cout << receive[i] << " ";
+            }
+            cout << endl;
 
-
-            ofstream throughPutFile("throughput.txt", ios::app);
+            ofstream throughPutFile("thghput.txt", ios::app);
             throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
             double throughPutSum = 0.000;
             for (int i = 0; i < standardThroughPut.size(); i++) {
