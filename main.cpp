@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
+#include <fstream>
 
 using namespace std;
 const int BandWidth = 2000; // kbps
@@ -81,6 +82,10 @@ vector<double> solveThroughput(vector<double> throughput, int business) {
     double distance = sum + randDecrease - gate;
     int needToFix = (rand() % (business - 2)) + 3;
     double average = distance / (double) needToFix;
+    while (average > throughput[0]) {
+        needToFix = (rand() % (business - 2)) + 3;
+        average = distance / (double) needToFix;
+    }
     vector<int> whichToChange = initWhich(business, needToFix);
     for (int i = 0; i < whichToChange.size(); i++) {
         if (whichToChange[i] == 1) {
@@ -130,9 +135,15 @@ int getTopValue(vector<double> throughPut, int kind, int business) {
             return (i + 1);
         }
     }
-    return business;
+    return 30;
 }
 
+/**
+ * get yuzhi of delay
+ * @param delay
+ * @param top
+ * @return
+ */
 double getDelayGate(vector<double> delay, int top) {
     double sum = 0.000;
     for (int i = 0; i < top; i++) {
@@ -141,6 +152,13 @@ double getDelayGate(vector<double> delay, int top) {
     return sum;
 }
 
+/**
+ * compute the distance and random increase business
+ * @param delay
+ * @param business
+ * @param top
+ * @return
+ */
 vector<double> solveDelay(vector<double> delay, int business, int top) {
     if (business < top) {
         return delay;
@@ -169,41 +187,64 @@ int main() {
     int kind = 1;
     int business = 30;
     int dataRate = 20; //  packets/s
-    int nodeNum = kind * business * 2;
+    for (kind = 1; kind < 4; kind++) {
+        for (business = 1; business * kind <= 30; business++) {
 
-    //  get packet size of each business
-    vector<int> packetSize = initPacket(kind, business);
-    for (int i = 0; i < packetSize.size(); i++) {
-        cout << packetSize[i] << " ";
+            //  get packet size of each business
+            vector<int> packetSize = initPacket(kind, business);
+//    for (int i = 0; i < packetSize.size(); i++) {
+//        cout << packetSize[i] << " ";
+//    }
+//    cout << endl;
+
+            //  get standard delay of each business
+            vector<double> standardDelay = getStandardDelay(packetSize);
+//    for (int i = 0; i < standardDelay.size(); i++) {
+//        cout << standardDelay[i] << " ";
+//    }
+//    cout << endl;
+
+            vector<double> standardThroughPut = getStandardThroughPut(packetSize, dataRate);
+//    for (int i = 0; i < standardThroughPut.size(); i++) {
+//        cout << standardThroughPut[i] << " ";
+//    }
+//    cout << endl;
+
+            int top = getTopValue(standardThroughPut, kind, business);
+            cout << top << endl;
+
+            standardThroughPut = solveThroughput(standardThroughPut, business);
+//    for (int i = 0; i < standardThroughPut.size(); i++) {
+//        cout << standardThroughPut[i] << " ";
+//    }
+//    cout << endl;
+
+            standardDelay = solveDelay(standardDelay, business, top);
+//    for (int i = 0; i < standardDelay.size(); i++) {
+//        cout << standardDelay[i] << " ";
+//    }
+//    cout << endl;
+
+            ofstream throughPutFile("throughput.txt", ios::app);
+            throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+            double throughPutSum = 0.000;
+            for (int i = 0; i < standardThroughPut.size(); i++) {
+                throughPutSum += standardThroughPut[i];
+                throughPutFile << standardThroughPut[i] << endl;
+            }
+            throughPutFile << throughPutSum << endl;
+
+
+            ofstream delayFile("delayFile.txt", ios::app);
+            delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+            double delaySum = 0.000;
+            for (int i = 0; i < standardDelay.size(); i++) {
+                delaySum += standardDelay[i];
+                delayFile << standardDelay[i] << endl;
+            }
+            delayFile << delaySum << endl;
+
+        }
     }
-    cout << endl;
-
-    //  get standard delay of each business
-    vector<double> standardDelay = getStandardDelay(packetSize);
-    for (int i = 0; i < standardDelay.size(); i++) {
-        cout << standardDelay[i] << " ";
-    }
-    cout << endl;
-
-    vector<double> standardThroughPut = getStandardThroughPut(packetSize, dataRate);
-    for (int i = 0; i < standardThroughPut.size(); i++) {
-        cout << standardThroughPut[i] << " ";
-    }
-    cout << endl;
-
-    int top = getTopValue(standardThroughPut, kind, business);
-    cout << top << endl;
-
-    standardThroughPut = solveThroughput(standardThroughPut, business);
-    for (int i = 0; i < standardThroughPut.size(); i++) {
-        cout << standardThroughPut[i] << " ";
-    }
-    cout << endl;
-
-    standardDelay = solveDelay(standardDelay, business, top);
-    for (int i = 0; i < standardDelay.size(); i++) {
-        cout << standardDelay[i] << " ";
-    }
-    cout << endl;
     return 0;
 }
