@@ -2,6 +2,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <fstream>
+#include <time.h>
 
 using namespace std;
 const int BandWidth = 2000; // kbps
@@ -183,10 +184,25 @@ vector<double> solveDelay(vector<double> delay, int business, int top) {
     return delay;
 }
 
+/**
+ * get how many packets has received
+ * @param standardTh
+ * @param solvedTh
+ * @return
+ */
+vector<int> getReceivePackets(vector<double> standardTh, vector<double> solvedTh) {
+    vector<int> receive(standardTh.size());
+    for (int i = 0; i < standardTh.size(); i++) {
+        receive[i] = (solvedTh[i] / standardTh[i]) * 1000;
+    }
+    return receive;
+}
+
 int main() {
     int kind = 1;
     int business = 30;
     int dataRate = 20; //  packets/s
+    srand((unsigned) time(0));
     for (kind = 1; kind < 4; kind++) {
         for (business = 1; business * kind <= 30; business++) {
 
@@ -210,6 +226,8 @@ int main() {
 //    }
 //    cout << endl;
 
+            vector<double> tmpThroughPut = standardThroughPut;
+
             int top = getTopValue(standardThroughPut, kind, business);
             cout << top << endl;
 
@@ -224,6 +242,9 @@ int main() {
 //        cout << standardDelay[i] << " ";
 //    }
 //    cout << endl;
+
+            vector<int> receive = getReceivePackets(tmpThroughPut,standardThroughPut);
+
 
             ofstream throughPutFile("throughput.txt", ios::app);
             throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
@@ -244,6 +265,14 @@ int main() {
             }
             delayFile << delaySum << endl;
 
+            ofstream PidSizeFile("PidSizeFile.txt", ios::app);
+            PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+            int pidSizeSum = 0;
+            for (int i = 0; i < receive.size(); i++) {
+                pidSizeSum += receive[i];
+                PidSizeFile << receive[i] << endl;
+            }
+            PidSizeFile << pidSizeSum << endl;
         }
     }
     return 0;
