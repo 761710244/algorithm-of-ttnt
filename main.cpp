@@ -263,8 +263,9 @@ int main() {
             delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
             double delaySum = 0.000;
             for (int i = 0; i < standardDelay.size(); i++) {
-                delaySum += standardDelay[i];
-                delayFile << standardDelay[i] << endl;
+                double tmp = standardDelay[i] * 3 + (rand() % 10);
+                delaySum += tmp;
+                delayFile << tmp << endl;
             }
             delayFile << delaySum << endl;
 
