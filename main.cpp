@@ -6,7 +6,7 @@
 
 using namespace std;
 const int BandWidth = 2000; // kbps
-const int gate = 1800;
+const int gate = 1600;
 
 /**
  * init packet size
@@ -21,7 +21,7 @@ vector<int> initPacket(int kind, int business) {
         for (int j = 0; j < business; j++) {
             packet[i * business + j] = maxSize;
         }
-        maxSize -= 40;
+        maxSize += 500;
     }
     return packet;
 }
@@ -66,6 +66,22 @@ vector<int> initWhich(int business, int neeToChange) {
 }
 
 /**
+ * get which kind business all throughput
+ * @param throughput
+ * @param index
+ * @param business
+ * @return
+ */
+double getKindBusinessTh(vector<double> throughput, int kind, int business) {
+    double sum = 0.000;
+    int start = (kind - 1) * business;
+    for (int i = start; i < start + business; i++) {
+        sum += throughput[i];
+    }
+    return sum;
+}
+
+/**
  * adjust throughput
  * @param throughput
  * @param business
@@ -82,14 +98,25 @@ vector<double> solveThroughput(vector<double> throughput, int business) {
     int randDecrease = rand() % 50;
     double distance = sum + randDecrease - gate;
     int needToFix = (rand() % (business - 2)) + 3;
+    int start = 1;
+    double kindOne = getKindBusinessTh(throughput, start, business);
+    //  keep high priority business to send
+    while (kindOne < distance) {
+        distance -= kindOne;
+        start++;
+        kindOne = getKindBusinessTh(throughput, start, business);
+    }
     double average = distance / (double) needToFix;
-    while (average > throughput[0]) {
+    while (average > throughput[(start - 1) * business]) {
         needToFix = (rand() % (business - 2)) + 3;
         average = distance / (double) needToFix;
     }
     vector<int> whichToChange = initWhich(business, needToFix);
-    for (int i = 0; i < whichToChange.size(); i++) {
-        if (whichToChange[i] == 1) {
+    for (int i = 0; i < (start - 1) * business; i++) {
+        throughput[i] = 0;
+    }
+    for (int i = (start - 1) * business; i < (start - 1) * business + business; i++) {
+        if (whichToChange[i - ((start - 1) * business)] == 1) {
             throughput[i] -= average;
         }
     }
@@ -249,7 +276,7 @@ int main() {
             }
             cout << endl;
 
-            ofstream throughPutFile("thghput.txt", ios::app);
+            ofstream throughPutFile("throughput.txt", ios::app);
             throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
             double throughPutSum = 0.000;
             for (int i = 0; i < standardThroughPut.size(); i++) {
@@ -263,13 +290,13 @@ int main() {
             delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
             double delaySum = 0.000;
             for (int i = 0; i < standardDelay.size(); i++) {
-                double tmp = standardDelay[i] * 3 + (rand() % 10);
+                double tmp = standardDelay[i]/* * 3 + (rand() % 10)*/;
                 delaySum += tmp;
                 delayFile << tmp << endl;
             }
             delayFile << delaySum << endl;
 
-            ofstream PidSizeFile("PidSizeFile.txt", ios::app);
+            ofstream PidSizeFile("pidSizeFile.txt", ios::app);
             PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
             int pidSizeSum = 0;
             for (int i = 0; i < receive.size(); i++) {
