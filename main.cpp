@@ -229,7 +229,7 @@ vector<int> getReceivePackets(vector<double> standardTh, vector<double> solvedTh
     return receive;
 }
 
-void SinglePerformance(int hop) {
+void Performance(int hop) {
 
     double throughKey = 1;
     double delayKey = 1;
@@ -304,6 +304,7 @@ void SinglePerformance(int hop) {
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double delaySum = 0.000;
     for (int i = 0; i < standardDelay.size(); i++) {
+        randomValue = hop == 3 ? rand() % 5 : randomValue;
         double tmp = standardDelay[i] * delayKey + randomValue;
         delaySum += tmp;
         delayFile << tmp << endl;
@@ -314,8 +315,10 @@ void SinglePerformance(int hop) {
     PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
     int pidSizeSum = 0;
     for (int i = 0; i < receive.size(); i++) {
-        pidSizeSum += receive[i];
-        PidSizeFile << receive[i] * throughKey << endl;
+        randomValue = hop == 3 ? rand() % 5 : randomValue;
+        int tmp = receive[i] * throughKey + randomValue;
+        pidSizeSum += tmp;
+        PidSizeFile << tmp << endl;
     }
     PidSizeFile << pidSizeSum << endl;
 }
@@ -325,7 +328,7 @@ int main() {
     srand((unsigned) time(0));
     for (kind = 1; kind < 4; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            SinglePerformance(3);
+            Performance(3);
         }
     }
     return 0;
