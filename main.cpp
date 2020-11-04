@@ -323,12 +323,96 @@ void Performance(int hop) {
     PidSizeFile << pidSizeSum << endl;
 }
 
+void routing(bool opti) {
+
+    double throughKey = 1.0;
+    double delayKey = 1.0;
+    int randomValue = 0;
+    throughKey = opti == false ? throughKey : 0.5;
+    delayKey = opti == false ? delayKey : 12 + (rand() % 10) / 10;
+
+    //  get packet size of each business
+    vector<int> packetSize = initPacket(kind, business);
+    for (int i = 0; i < packetSize.size(); i++) {
+        cout << packetSize[i] << " ";
+    }
+    cout << endl;
+
+    //  get standard delay of each business
+    vector<double> standardDelay = getStandardDelay(packetSize);
+    for (int i = 0; i < standardDelay.size(); i++) {
+        cout << standardDelay[i] << " ";
+    }
+    cout << endl;
+
+    vector<double> standardThroughPut = getStandardThroughPut(packetSize, dataRate);
+    for (int i = 0; i < standardThroughPut.size(); i++) {
+        cout << standardThroughPut[i] << " ";
+    }
+    cout << endl;
+
+    vector<double> tmpThroughPut = standardThroughPut;
+
+    int top = getTopValue(standardThroughPut, kind, business);
+    cout << top << endl;
+
+    standardThroughPut = solveThroughput(standardThroughPut, business);
+    for (int i = 0; i < standardThroughPut.size(); i++) {
+        cout << standardThroughPut[i] << " ";
+    }
+    cout << endl;
+
+    standardDelay = solveDelay(standardDelay, business, top);
+    for (int i = 0; i < standardDelay.size(); i++) {
+        cout << standardDelay[i] << " ";
+    }
+    cout << endl;
+
+    vector<int> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+    for (int i = 0; i < receive.size(); i++) {
+        cout << receive[i] << " ";
+    }
+    cout << endl;
+
+    ofstream throughPutFile("throughput.txt", ios::app);
+    throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+    double throughPutSum = 0.000;
+    for (int i = 0; i < standardThroughPut.size(); i++) {
+        throughPutSum += standardThroughPut[i] * throughKey;
+        throughPutFile << standardThroughPut[i] * throughKey << endl;
+    }
+    throughPutFile << throughPutSum << endl;
+
+
+    ofstream delayFile("delayFile.txt", ios::app);
+    delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+    double delaySum = 0.000;
+    for (int i = 0; i < standardDelay.size(); i++) {
+        randomValue = opti == false ? randomValue : rand() % 5;
+        double tmp = standardDelay[i] * delayKey + randomValue;
+        delaySum += tmp;
+        delayFile << tmp << endl;
+    }
+    delayFile << delaySum << endl;
+
+    ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+    PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+    int pidSizeSum = 0;
+    for (int i = 0; i < receive.size(); i++) {
+        randomValue = opti == false ? randomValue : rand() % 5;
+        int tmp = receive[i] * throughKey + randomValue;
+        pidSizeSum += tmp;
+        PidSizeFile << tmp << endl;
+    }
+    PidSizeFile << pidSizeSum << endl;
+}
+
 int main() {
 
     srand((unsigned) time(0));
     for (kind = 1; kind < 4; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            Performance(3);
+            routing(false);
         }
     }
     return 0;
