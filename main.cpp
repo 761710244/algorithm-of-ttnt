@@ -242,7 +242,6 @@ void Performance(int hop) {
         case 3:
             throughKey = 0.95;
             delayKey = 3;
-            randomValue = rand() % 10;
             break;
         default:
             break;
@@ -325,11 +324,11 @@ void Performance(int hop) {
 
 void routing(bool opti) {
 
-    double throughKey = 1.0;
-    double delayKey = 1.0;
+    double throughKey = 0.5;
+    double delayKey = 12 + (rand() % 10) / 10;
     int randomValue = 0;
-    throughKey = opti == false ? throughKey : 0.5;
-    delayKey = opti == false ? delayKey : 12 + (rand() % 10) / 10;
+    throughKey = opti == false ? throughKey : 0.6;
+    delayKey = opti == false ? delayKey : 8 + (rand() % 10) / 10;
 
     //  get packet size of each business
     vector<int> packetSize = initPacket(kind, business);
@@ -388,7 +387,7 @@ void routing(bool opti) {
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double delaySum = 0.000;
     for (int i = 0; i < standardDelay.size(); i++) {
-        randomValue = opti == false ? randomValue : rand() % 5;
+        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
         double tmp = standardDelay[i] * delayKey + randomValue;
         delaySum += tmp;
         delayFile << tmp << endl;
@@ -399,7 +398,7 @@ void routing(bool opti) {
     PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
     int pidSizeSum = 0;
     for (int i = 0; i < receive.size(); i++) {
-        randomValue = opti == false ? randomValue : rand() % 5;
+        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
         int tmp = receive[i] * throughKey + randomValue;
         pidSizeSum += tmp;
         PidSizeFile << tmp << endl;
@@ -412,7 +411,7 @@ int main() {
     srand((unsigned) time(0));
     for (kind = 1; kind < 4; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            routing(false);
+            routing(true);
         }
     }
     return 0;
