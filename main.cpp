@@ -5,12 +5,13 @@
 #include <time.h>
 
 using namespace std;
-const int BandWidth = 2000; // kbps
-const int gate = 1600;
+const int BandWidth = 10000; // kbps
+const int gate = BandWidth * 0.8;
 
 int kind = 1;
 int business = 30;
-int dataRate = 20; //  packets/s
+int dataRate = 100; //  packets/s
+int simulateTime = 50;  //  s
 
 /**
  * init packet size
@@ -139,8 +140,8 @@ vector<double> getStandardDelay(vector<int> pktSize) {
         delay[i] /= 1024;
         delay[i] /= BandWidth;
         delay[i] *= 1000;
-        double random = rand() % 10;
-        delay[i] += 0.4 + random / 100;
+        double random = rand() % 100;
+        delay[i] += random / 1000;
     }
     return delay;
 }
@@ -224,7 +225,7 @@ vector<double> solveDelay(vector<double> delay, int business, int top) {
 vector<int> getReceivePackets(vector<double> standardTh, vector<double> solvedTh) {
     vector<int> receive(standardTh.size());
     for (int i = 0; i < standardTh.size(); i++) {
-        receive[i] = (solvedTh[i] / standardTh[i]) * 1000;
+        receive[i] = (solvedTh[i] / standardTh[i]) * dataRate * simulateTime;
     }
     return receive;
 }
@@ -493,9 +494,9 @@ void linkError(bool opti) {
 int main() {
 
     srand((unsigned) time(0));
-    for (kind = 1; kind < 4; kind++) {
+    for (kind = 1; kind < 2; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            linkError(true);
+            Performance(1);
         }
     }
     return 0;
