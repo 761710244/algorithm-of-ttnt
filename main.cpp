@@ -26,7 +26,7 @@ vector<int> initPacket(int kind, int business) {
         for (int j = 0; j < business; j++) {
             packet[i * business + j] = maxSize - 48;
         }
-        maxSize -= 40;
+        maxSize -= 10;
     }
     return packet;
 }
@@ -291,36 +291,69 @@ void Performance(int hop) {
     cout << endl;
 
     ofstream throughPutFile("throughput.txt", ios::app);
+    throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
-    for (int i = 0; i < standardThroughPut.size(); i++) {
-        throughPutSum += standardThroughPut[i] * throughKey;
-        throughPutFile << standardThroughPut[i] * throughKey << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            throughPutSum += standardThroughPut[i * business + j] * throughKey;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+        }
+        throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
+        throughPutSum = 0.000;
     }
-    throughPutFile << throughPutSum << endl;
+//    for (int i = 0; i < standardThroughPut.size(); i++) {
+//        throughPutSum += standardThroughPut[i] * throughKey;
+//        throughPutFile << standardThroughPut[i] * throughKey << endl;
+//    }
+//    throughPutFile << throughPutSum << endl;
 
 
     ofstream delayFile("delayFile.txt", ios::app);
+    delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double delaySum = 0.000;
-    for (int i = 0; i < standardDelay.size(); i++) {
-        randomValue = hop == 3 ? rand() % 5 : randomValue;
-        double tmp = standardDelay[i] * delayKey + randomValue;
-        delaySum += tmp;
-        delayFile << tmp << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = hop == 3 ? (rand() % 5) / 10 : randomValue;
+            double tmp = standardDelay[i * business + j] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << endl;
+        }
+        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delaySum = 0.000;
     }
-    delayFile << delaySum << endl;
+
+//    for (int i = 0; i < standardDelay.size(); i++) {
+//        randomValue = hop == 3 ? (rand() % 5) / 10 : randomValue;
+//        double tmp = standardDelay[i] * delayKey + randomValue;
+//        delaySum += tmp;
+//        delayFile << tmp << endl;
+//    }
+//    delayFile << delaySum << endl;
 
     ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+    PidSizeFile << endl;
     PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
     int pidSizeSum = 0;
-    for (int i = 0; i < receive.size(); i++) {
-        randomValue = hop == 3 ? rand() % 5 : randomValue;
-        int tmp = receive[i] * throughKey + randomValue;
-        pidSizeSum += tmp;
-        PidSizeFile << tmp << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = hop == 3 ? rand() % 5 : randomValue;
+            int tmp = receive[i * business + j] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+        PidSizeFile << "Current kind: " << i + 1 << ", sum = " << pidSizeSum << endl;
+        pidSizeSum = 0.000;
     }
-    PidSizeFile << pidSizeSum << endl;
+
+//    for (int i = 0; i < receive.size(); i++) {
+//        randomValue = hop == 3 ? rand() % 5 : randomValue;
+//        int tmp = receive[i] * throughKey + randomValue;
+//        pidSizeSum += tmp;
+//        PidSizeFile << tmp << endl;
+//    }
+//    PidSizeFile << pidSizeSum << endl;
 }
 
 void routing(bool opti) {
@@ -375,36 +408,67 @@ void routing(bool opti) {
     cout << endl;
 
     ofstream throughPutFile("throughput.txt", ios::app);
+    throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
-    for (int i = 0; i < standardThroughPut.size(); i++) {
-        throughPutSum += standardThroughPut[i] * throughKey;
-        throughPutFile << standardThroughPut[i] * throughKey << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            throughPutSum += standardThroughPut[i * business + j] * throughKey;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+        }
+        throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
+        throughPutSum = 0.000;
     }
-    throughPutFile << throughPutSum << endl;
+//    for (int i = 0; i < standardThroughPut.size(); i++) {
+//        throughPutSum += standardThroughPut[i] * throughKey;
+//        throughPutFile << standardThroughPut[i] * throughKey << endl;
+//    }
+//    throughPutFile << throughPutSum << endl;
 
 
     ofstream delayFile("delayFile.txt", ios::app);
+    delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double delaySum = 0.000;
-    for (int i = 0; i < standardDelay.size(); i++) {
-        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-        double tmp = standardDelay[i] * delayKey + randomValue;
-        delaySum += tmp;
-        delayFile << tmp << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+            double tmp = standardDelay[i * business + j] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << endl;
+        }
+        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delaySum = 0.000;
     }
-    delayFile << delaySum << endl;
+//    for (int i = 0; i < standardDelay.size(); i++) {
+//        randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+//        double tmp = standardDelay[i] * delayKey + randomValue;
+//        delaySum += tmp;
+//        delayFile << tmp << endl;
+//    }
+//    delayFile << delaySum << endl;
 
     ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+    PidSizeFile << endl;
     PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
     int pidSizeSum = 0;
-    for (int i = 0; i < receive.size(); i++) {
-        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-        int tmp = receive[i] * throughKey + randomValue;
-        pidSizeSum += tmp;
-        PidSizeFile << tmp << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
+            int tmp = receive[i * business + j] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+        PidSizeFile << "Current kind: " << i + 1 << ", sum = " << pidSizeSum << endl;
+        pidSizeSum = 0.000;
     }
-    PidSizeFile << pidSizeSum << endl;
+//    for (int i = 0; i < receive.size(); i++) {
+//        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
+//        int tmp = receive[i] * throughKey + randomValue;
+//        pidSizeSum += tmp;
+//        PidSizeFile << tmp << endl;
+//    }
+//    PidSizeFile << pidSizeSum << endl;
 }
 
 void linkError(bool opti) {
@@ -459,44 +523,75 @@ void linkError(bool opti) {
     cout << endl;
 
     ofstream throughPutFile("throughput.txt", ios::app);
+    throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
-    for (int i = 0; i < standardThroughPut.size(); i++) {
-        throughPutSum += standardThroughPut[i] * throughKey;
-        throughPutFile << standardThroughPut[i] * throughKey << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            throughPutSum += standardThroughPut[i * business + j] * throughKey;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+        }
+        throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
+        throughPutSum = 0.000;
     }
-    throughPutFile << throughPutSum << endl;
+//    for (int i = 0; i < standardThroughPut.size(); i++) {
+//        throughPutSum += standardThroughPut[i] * throughKey;
+//        throughPutFile << standardThroughPut[i] * throughKey << endl;
+//    }
+//    throughPutFile << throughPutSum << endl;
 
 
     ofstream delayFile("delayFile.txt", ios::app);
+    delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double delaySum = 0.000;
-    for (int i = 0; i < standardDelay.size(); i++) {
-        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-        double tmp = standardDelay[i] * delayKey + randomValue;
-        delaySum += tmp;
-        delayFile << tmp << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+            double tmp = standardDelay[i * business + j] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << endl;
+        }
+        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delaySum = 0.000;
     }
-    delayFile << delaySum << endl;
+//    for (int i = 0; i < standardDelay.size(); i++) {
+//        randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+//        double tmp = standardDelay[i] * delayKey + randomValue;
+//        delaySum += tmp;
+//        delayFile << tmp << endl;
+//    }
+//    delayFile << delaySum << endl;
 
     ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+    PidSizeFile << endl;
     PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
     int pidSizeSum = 0;
-    for (int i = 0; i < receive.size(); i++) {
-        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-        int tmp = receive[i] * throughKey + randomValue;
-        pidSizeSum += tmp;
-        PidSizeFile << tmp << endl;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
+            int tmp = receive[i * business + j] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+        PidSizeFile << "Current kind: " << i + 1 << ", sum = " << pidSizeSum << endl;
+        pidSizeSum = 0.000;
     }
-    PidSizeFile << pidSizeSum << endl;
+//    for (int i = 0; i < receive.size(); i++) {
+//        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
+//        int tmp = receive[i] * throughKey + randomValue;
+//        pidSizeSum += tmp;
+//        PidSizeFile << tmp << endl;
+//    }
+//    PidSizeFile << pidSizeSum << endl;
 }
 
 int main() {
 
     srand((unsigned) time(0));
-    for (kind = 1; kind < 2; kind++) {
+    for (kind = 1; kind < 5; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            Performance(1);
+            Performance(3);
         }
     }
     return 0;
