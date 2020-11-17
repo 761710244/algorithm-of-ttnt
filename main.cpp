@@ -591,7 +591,7 @@ int main() {
     srand((unsigned) time(0));
     for (kind = 1; kind < 5; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            routing(false);
+            linkError(true);
         }
     }
     return 0;
