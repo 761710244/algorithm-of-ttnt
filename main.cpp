@@ -432,7 +432,7 @@ void routing(bool opti) {
     double delaySum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+            randomValue = opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << endl;
@@ -547,7 +547,7 @@ void linkError(bool opti) {
     double delaySum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+            randomValue = opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << endl;
