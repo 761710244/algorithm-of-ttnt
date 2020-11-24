@@ -586,12 +586,141 @@ void linkError(bool opti) {
 //    PidSizeFile << pidSizeSum << endl;
 }
 
+void partitionBitErrorRate(int bitErrorRate, bool opti) {
+    double throughKey = 0.95;
+    double delayKey = 3.0;
+    int randomValue = 0;
+
+    switch (bitErrorRate) {
+        case 1:
+            throughKey = opti == false ? 0.95 : 1.0;
+            delayKey = opti == false ? 3.0 : 2.0;
+            break;
+        case 3:
+            throughKey = opti == false ? 0.8 : 0.9;
+            delayKey = opti == false ? 7 : 4;
+            break;
+        case 5:
+            throughKey = opti == false ? 0.6 : 0.8;
+            delayKey = opti == false ? 12.0 : 8;
+            break;
+        default:
+            break;
+    }
+
+    //  get packet size of each business
+    vector<int> packetSize = initPacket(kind, business);
+    for (int i = 0; i < packetSize.size(); i++) {
+        cout << packetSize[i] << " ";
+    }
+    cout << endl;
+
+    //  get standard delay of each business
+    vector<double> standardDelay = getStandardDelay(packetSize);
+    for (int i = 0; i < standardDelay.size(); i++) {
+        cout << standardDelay[i] << " ";
+    }
+    cout << endl;
+
+    vector<double> standardThroughPut = getStandardThroughPut(packetSize, dataRate);
+    for (int i = 0; i < standardThroughPut.size(); i++) {
+        cout << standardThroughPut[i] << " ";
+    }
+    cout << endl;
+
+    vector<double> tmpThroughPut = standardThroughPut;
+
+    int top = getTopValue(standardThroughPut, kind, business);
+    cout << top << endl;
+
+    standardThroughPut = solveThroughput(standardThroughPut, business);
+    for (int i = 0; i < standardThroughPut.size(); i++) {
+        cout << standardThroughPut[i] << " ";
+    }
+    cout << endl;
+
+    standardDelay = solveDelay(standardDelay, business, top);
+    for (int i = 0; i < standardDelay.size(); i++) {
+        cout << standardDelay[i] << " ";
+    }
+    cout << endl;
+
+    vector<int> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+    for (int i = 0; i < receive.size(); i++) {
+        cout << receive[i] << " ";
+    }
+    cout << endl;
+
+    ofstream throughPutFile("throughput.txt", ios::app);
+    throughPutFile << endl;
+    throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+    double throughPutSum = 0.000;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            throughPutSum += standardThroughPut[i * business + j] * throughKey;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+        }
+        throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
+        throughPutSum = 0.000;
+    }
+//    for (int i = 0; i < standardThroughPut.size(); i++) {
+//        throughPutSum += standardThroughPut[i] * throughKey;
+//        throughPutFile << standardThroughPut[i] * throughKey << endl;
+//    }
+//    throughPutFile << throughPutSum << endl;
+
+
+    ofstream delayFile("delayFile.txt", ios::app);
+    delayFile << endl;
+    delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+    double delaySum = 0.000;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = (rand() % 5) / 10;
+            double tmp = standardDelay[i * business + j] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << endl;
+        }
+        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delaySum = 0.000;
+    }
+//    for (int i = 0; i < standardDelay.size(); i++) {
+//        randomValue = opti == false ? (rand() % 5) / 10 : (rand() % 10) - 5;
+//        double tmp = standardDelay[i] * delayKey + randomValue;
+//        delaySum += tmp;
+//        delayFile << tmp << endl;
+//    }
+//    delayFile << delaySum << endl;
+
+    ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+    PidSizeFile << endl;
+    PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+    int pidSizeSum = 0;
+    for (int i = 0; i < kind; i++) {
+        for (int j = 0; j < business; ++j) {
+            randomValue = (rand() % 10) - 5;
+            int tmp = receive[i * business + j] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+        PidSizeFile << "Current kind: " << i + 1 << ", sum = " << pidSizeSum << endl;
+        pidSizeSum = 0.000;
+    }
+//    for (int i = 0; i < receive.size(); i++) {
+//        randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
+//        int tmp = receive[i] * throughKey + randomValue;
+//        pidSizeSum += tmp;
+//        PidSizeFile << tmp << endl;
+//    }
+//    PidSizeFile << pidSizeSum << endl;
+}
+
 int main() {
 
     srand((unsigned) time(0));
     for (kind = 1; kind < 5; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            linkError(true);
+            partitionBitErrorRate(3, false);
         }
     }
     return 0;
