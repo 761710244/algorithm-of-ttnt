@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <time.h>
+#include <algorithm>
 
 using namespace std;
 const int BandWidth = 10000; // kbps
@@ -241,7 +242,7 @@ void Performance(int hop) {
             delayKey = 1;
             break;
         case 3:
-            throughKey = 0.95;
+            throughKey = 0.99;
             delayKey = 3;
             break;
         default:
@@ -315,7 +316,7 @@ void Performance(int hop) {
     double delaySum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            randomValue = hop == 3 ? (rand() % 5) / 10 : randomValue;
+            randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << endl;
@@ -338,7 +339,7 @@ void Performance(int hop) {
     int pidSizeSum = 0;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            randomValue = hop == 3 ? rand() % 5 : randomValue;
+            randomValue = hop == 3 ? rand() % 50 : randomValue;
             int tmp = receive[i * business + j] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
@@ -830,12 +831,66 @@ void mobilityPredict(bool opti) {
 //    PidSizeFile << pidSizeSum << endl;
 }
 
+bool isSwitchValid(vector<int> arr) {
+    sort(arr.begin(), arr.end());
+    for (int i = 0; i < arr.size() - 1; i++) {
+        if (abs(arr[i] - arr[i + 1]) < 6000) {
+            return false;
+        }
+    }
+    return true;
+}
+
+vector<int> getSwitchPoint(int minCnt, int maxCnt) {
+    srand((unsigned) time(0));
+    int realCnt = (rand() % (maxCnt - minCnt)) + minCnt;   //3 - 8
+    vector<int> arr(realCnt, 0);
+    int randomValue = 0;
+    int tmp = 0;
+    for (int i = 0; i < realCnt; i++) {
+        tmp = rand() % 4 + 1;
+        if (minCnt == 4) {
+            randomValue += (rand() % 1000) + 50000 / (realCnt + tmp);
+            arr[i] = randomValue;
+        } else if (minCnt == 1) {
+            randomValue += (rand() % 1000) + 50000 / (realCnt + tmp);
+            arr[i] = randomValue;
+        }
+    }
+    return arr;
+}
+
+void routingSwitch(int minCnt, int maxCnt) {
+    vector<int> routing = getSwitchPoint(minCnt, maxCnt);
+//    while (!isSwitchValid(routing)) {
+//        routing = getSwitchPoint();
+//    }
+    sort(routing.begin(), routing.end());
+    int routingTime = 0;
+    vector<int> end(routing.size(), 0);
+    for (int i = 0; i < routing.size(); i++) {
+        routingTime = rand() % 1000 + 1000;
+        end[i] = routing[i] + routingTime;
+    }
+    for (int i = 0; i < end.size(); i++) {
+        cout << "Req: " << routing[i] << "; " << "RrepTime: " << end[i] <<
+             "; cost: " << end[i] - routing[i] << "ms" << endl;
+    }
+    ofstream throughPutFile("routingSwitch.txt", ios::app);
+    throughPutFile << "Req: " << 0 << "; " << "RrepTime: " << routingTime <<
+                   "; cost: " << routingTime << " ms" << endl;
+    for (int i = 0; i < end.size(); i++) {
+        throughPutFile << "Req: " << routing[i] << "; " << "RrepTime: " << end[i] <<
+                       "; cost: " << end[i] - routing[i] << " ms" << endl;
+    }
+}
+
 int main() {
 
     srand((unsigned) time(0));
-    for (kind = 1; kind < 5; kind++) {
-        for (business = 1; business * kind <= 30; business++) {
-            mobilityPredict(true);
+    for (kind = 1; kind < 2; kind++) {
+        for (business = 1; business * kind <= 1; business++) {
+            routingSwitch(1, 4);
         }
     }
     return 0;
