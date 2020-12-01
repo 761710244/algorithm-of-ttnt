@@ -6,8 +6,9 @@
 #include <algorithm>
 
 using namespace std;
-const int BandWidth = 10000; // kbps
+const int BandWidth = 2000; // kbps
 const int gate = BandWidth * 0.8;
+const double channelNum = 6.5;
 
 int kind = 1;
 int business = 30;
@@ -22,12 +23,12 @@ int simulateTime = 50;  //  s
  */
 vector<int> initPacket(int kind, int business) {
     vector<int> packet(kind * business);
-    int maxSize = 500;
+    int maxSize = 128;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; j++) {
-            packet[i * business + j] = maxSize - 48;
+            packet[i * business + j] = maxSize;
         }
-        maxSize -= 10;
+//        maxSize -= 10;
     }
     return packet;
 }
@@ -43,7 +44,7 @@ vector<double> getStandardThroughPut(vector<int> pktSize, int rate) {
     for (int i = 0; i < pktSize.size(); i++) {
         throughput[i] = (pktSize[i] * 8 * rate) / 1000;
         double random = rand() % 500 + 500;
-        throughput[i] -= 1 + random / 1000;
+        throughput[i] += random / 1000;
     }
     return throughput;
 }
@@ -137,12 +138,13 @@ vector<double> solveThroughput(vector<double> throughput, int business) {
 vector<double> getStandardDelay(vector<int> pktSize) {
     vector<double> delay(pktSize.size());
     for (int i = 0; i < pktSize.size(); i++) {
-        delay[i] = (pktSize[i] + 104) * 8;
-        delay[i] /= 1024;
+        delay[i] = pktSize[i] * 8;
         delay[i] /= BandWidth;
-        delay[i] *= 1000;
-        double random = rand() % 100;
-        delay[i] += random / 1000;
+//        delay[i] *= 1000;
+        double random = (rand() % 30);
+        random /= 100;
+        delay[i] += random;
+        delay[i] += 1.0;
     }
     return delay;
 }
@@ -199,8 +201,27 @@ vector<double> solveDelay(vector<double> delay, int business, int top) {
     }
     int toFixBusiness = business - top + 1;
     double start = 1.1;
+    double key = 0.0;
+    switch (kind) {
+        case 1:
+            key = 1.2;
+            break;
+        case 2:
+            key = 1.5;
+            break;
+        case 3:
+            key = 2.0;
+            break;
+        case 4:
+            key = 2.5;
+            break;
+        default:
+            key = 5;
+            break;
+    }
+
     while (toFixBusiness > 0) {
-        start *= 1.2;
+        start *= key;
         toFixBusiness--;
     }
     double sum = getDelayGate(delay, top);
@@ -297,8 +318,8 @@ void Performance(int hop) {
     double throughPutSum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            throughPutSum += standardThroughPut[i * business + j] * throughKey;
-            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+            throughPutSum += standardThroughPut[i * business + j] * throughKey * channelNum;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey * channelNum << endl;
         }
         throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
         throughPutSum = 0.000;
@@ -888,9 +909,9 @@ void routingSwitch(int minCnt, int maxCnt) {
 int main() {
 
     srand((unsigned) time(0));
-    for (kind = 1; kind < 2; kind++) {
-        for (business = 1; business * kind <= 1; business++) {
-            routingSwitch(1, 4);
+    for (kind = 1; kind < 5; kind++) {
+        for (business = 1; business * kind <= 30; business++) {
+            Performance(1);
         }
     }
     return 0;
