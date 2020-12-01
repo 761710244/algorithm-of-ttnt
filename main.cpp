@@ -15,6 +15,8 @@ int business = 30;
 int dataRate = 60; //  packets/s
 int simulateTime = 50;  //  s
 
+void routingSwitch(int minCnt, int maxCnt);
+
 /**
  * init packet size
  * @param kind
@@ -208,13 +210,13 @@ vector<double> solveDelay(vector<double> delay, int business, int top) {
             key = 1.2;
             break;
         case 2:
-            key = 1.5;
+            key = 1.8;
             break;
         case 3:
-            key = 2.0;
+            key = 2.5;
             break;
         case 4:
-            key = 2.5;
+            key = 5;
             break;
         default:
             key = 5;
@@ -362,7 +364,7 @@ void Performance(int hop) {
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
             randomValue = hop == 3 ? rand() % 50 : randomValue;
-            int tmp = receive[i * business + j] * throughKey + randomValue;
+            int tmp = receive[i * business + j] * throughKey * channelNum + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
@@ -478,7 +480,7 @@ void routing(bool opti) {
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
             randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-            int tmp = receive[i * business + j] * throughKey + randomValue;
+            int tmp = receive[i * business + j] * throughKey * channelNum + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
@@ -492,6 +494,7 @@ void routing(bool opti) {
 //        PidSizeFile << tmp << endl;
 //    }
 //    PidSizeFile << pidSizeSum << endl;
+    routingSwitch(4, 8);
 }
 
 void linkError(bool opti) {
@@ -593,7 +596,7 @@ void linkError(bool opti) {
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
             randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-            int tmp = receive[i * business + j] * throughKey + randomValue;
+            int tmp = receive[i * business + j] * throughKey * channelNum + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
@@ -722,7 +725,7 @@ void partitionBitErrorRate(int bitErrorRate, bool opti) {
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
             randomValue = (rand() % 10) - 5;
-            int tmp = receive[i * business + j] * throughKey + randomValue;
+            int tmp = receive[i * business + j] * throughKey * channelNum + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
@@ -837,7 +840,7 @@ void mobilityPredict(bool opti) {
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
             randomValue = opti == false ? rand() % 5 : (rand() % 10) - 5;
-            int tmp = receive[i * business + j] * throughKey + randomValue;
+            int tmp = receive[i * business + j] * throughKey * channelNum + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
@@ -912,7 +915,7 @@ int main() {
     srand((unsigned) time(0));
     for (kind = 1; kind < 5; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            Performance(1);
+            linkError(true);
         }
     }
     return 0;
