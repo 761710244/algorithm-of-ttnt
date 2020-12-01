@@ -7,12 +7,12 @@
 
 using namespace std;
 const int BandWidth = 2000; // kbps
-const int gate = BandWidth * 0.8;
-const double channelNum = 6.5;
+const int gate = BandWidth * 0.7;
+const int channelNum = 8;
 
 int kind = 1;
 int business = 30;
-int dataRate = 100; //  packets/s
+int dataRate = 60; //  packets/s
 int simulateTime = 50;  //  s
 
 /**
@@ -44,7 +44,8 @@ vector<double> getStandardThroughPut(vector<int> pktSize, int rate) {
     for (int i = 0; i < pktSize.size(); i++) {
         throughput[i] = (pktSize[i] * 8 * rate) / 1000;
         double random = rand() % 500 + 500;
-        throughput[i] += random / 1000;
+        random /= 1000;
+        throughput[i] += random;
     }
     return throughput;
 }
@@ -435,8 +436,8 @@ void routing(bool opti) {
     double throughPutSum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            throughPutSum += standardThroughPut[i * business + j] * throughKey;
-            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+            throughPutSum += standardThroughPut[i * business + j] * throughKey * channelNum;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey * channelNum << endl;
         }
         throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
         throughPutSum = 0.000;
@@ -550,8 +551,8 @@ void linkError(bool opti) {
     double throughPutSum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            throughPutSum += standardThroughPut[i * business + j] * throughKey;
-            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+            throughPutSum += standardThroughPut[i * business + j] * throughKey * channelNum;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey * channelNum << endl;
         }
         throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
         throughPutSum = 0.000;
@@ -609,13 +610,13 @@ void linkError(bool opti) {
 }
 
 void partitionBitErrorRate(int bitErrorRate, bool opti) {
-    double throughKey = 0.95;
+    double throughKey = 0.99;
     double delayKey = 3.0;
     int randomValue = 0;
 
     switch (bitErrorRate) {
         case 1:
-            throughKey = opti == false ? 0.95 : 1.0;
+            throughKey = opti == false ? 0.99 : 1.0;
             delayKey = opti == false ? 3.0 : 2.0;
             break;
         case 3:
@@ -679,8 +680,8 @@ void partitionBitErrorRate(int bitErrorRate, bool opti) {
     double throughPutSum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            throughPutSum += standardThroughPut[i * business + j] * throughKey;
-            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+            throughPutSum += standardThroughPut[i * business + j] * throughKey * channelNum;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey * channelNum << endl;
         }
         throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
         throughPutSum = 0.000;
@@ -794,8 +795,8 @@ void mobilityPredict(bool opti) {
     double throughPutSum = 0.000;
     for (int i = 0; i < kind; i++) {
         for (int j = 0; j < business; ++j) {
-            throughPutSum += standardThroughPut[i * business + j] * throughKey;
-            throughPutFile << standardThroughPut[i * business + j] * throughKey << endl;
+            throughPutSum += standardThroughPut[i * business + j] * throughKey * channelNum;
+            throughPutFile << standardThroughPut[i * business + j] * throughKey * channelNum << endl;
         }
         throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
         throughPutSum = 0.000;
