@@ -4,6 +4,7 @@
 #include <fstream>
 #include <time.h>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 const int BandWidth = 2000; // kbps
@@ -14,6 +15,8 @@ int kind = 1;
 int business = 30;
 int dataRate = 60; //  packets/s
 int simulateTime = 50;  //  s
+
+static map<int, double> mapDelayKey;
 
 void routingSwitch(int minCnt, int maxCnt);
 
@@ -46,7 +49,7 @@ vector<double> getStandardThroughPut(vector<int> pktSize, int rate) {
     for (int i = 0; i < pktSize.size(); i++) {
         throughput[i] = (pktSize[i] * 8 * rate) / 1000;
         double random = rand() % 500 + 500;
-        random /= 1000;
+        random /= 3000;
         throughput[i] += random;
     }
     return throughput;
@@ -144,10 +147,10 @@ vector<double> getStandardDelay(vector<int> pktSize) {
         delay[i] = pktSize[i] * 8;
         delay[i] /= BandWidth;
 //        delay[i] *= 1000;
-        double random = (rand() % 30);
+        double random = (rand() % 10);
         random /= 100;
         delay[i] += random;
-        delay[i] += 1.0;
+        delay[i] += 1.1;
     }
     return delay;
 }
@@ -255,6 +258,20 @@ vector<int> getReceivePackets(vector<double> standardTh, vector<double> solvedTh
     return receive;
 }
 
+void initMapDelayKey(int businessKind, int funcNum) {
+    double start = 1.0;
+    for (int i = 0; i < businessKind; i++) {
+        mapDelayKey[businessKind - 1 - i] = start;
+        if (funcNum == 0) { //  performance
+            start += 0.06;
+        } else if (funcNum == 1) {  //  routing
+            start += 0.2;
+        } else if (funcNum == 2) {  //  linkerror
+            start += 0.1;
+        }
+    }
+}
+
 void Performance(int hop) {
 
     double throughKey = 1;
@@ -315,7 +332,7 @@ void Performance(int hop) {
     }
     cout << endl;
 
-    ofstream throughPutFile("throughput.txt", ios::app);
+    ofstream throughPutFile("throughputFile.txt", ios::app);
     throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
@@ -333,7 +350,7 @@ void Performance(int hop) {
 //    }
 //    throughPutFile << throughPutSum << endl;
 
-
+    initMapDelayKey(kind, 0);
     ofstream delayFile("delayFile.txt", ios::app);
     delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
@@ -342,10 +359,10 @@ void Performance(int hop) {
         for (int j = 0; j < business; ++j) {
             randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-            delaySum += tmp;
-            delayFile << tmp << endl;
+            delaySum += tmp * mapDelayKey[i];
+            delayFile << tmp * mapDelayKey[i] << endl;
         }
-        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << endl;
         delaySum = 0.000;
     }
 
@@ -432,7 +449,7 @@ void routing(bool opti) {
     }
     cout << endl;
 
-    ofstream throughPutFile("throughput.txt", ios::app);
+    ofstream throughPutFile("throughputFile.txt", ios::app);
     throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
@@ -450,7 +467,7 @@ void routing(bool opti) {
 //    }
 //    throughPutFile << throughPutSum << endl;
 
-
+    initMapDelayKey(kind, 1);
     ofstream delayFile("delayFile.txt", ios::app);
     delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
@@ -459,10 +476,10 @@ void routing(bool opti) {
         for (int j = 0; j < business; ++j) {
             randomValue = opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-            delaySum += tmp;
-            delayFile << tmp << endl;
+            delaySum += tmp * mapDelayKey[i];
+            delayFile << tmp * mapDelayKey[i] << endl;
         }
-        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << endl;
         delaySum = 0.000;
     }
 //    for (int i = 0; i < standardDelay.size(); i++) {
@@ -548,7 +565,7 @@ void linkError(bool opti) {
     }
     cout << endl;
 
-    ofstream throughPutFile("throughput.txt", ios::app);
+    ofstream throughPutFile("throughputFile.txt", ios::app);
     throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
@@ -566,7 +583,7 @@ void linkError(bool opti) {
 //    }
 //    throughPutFile << throughPutSum << endl;
 
-
+    initMapDelayKey(kind, 2);
     ofstream delayFile("delayFile.txt", ios::app);
     delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
@@ -575,10 +592,10 @@ void linkError(bool opti) {
         for (int j = 0; j < business; ++j) {
             randomValue = opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-            delaySum += tmp;
-            delayFile << tmp << endl;
+            delaySum += tmp * mapDelayKey[i];
+            delayFile << tmp * mapDelayKey[i] << endl;
         }
-        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << endl;
         delaySum = 0.000;
     }
 //    for (int i = 0; i < standardDelay.size(); i++) {
@@ -743,11 +760,11 @@ void partitionBitErrorRate(int bitErrorRate, bool opti) {
 
 void mobilityPredict(bool opti) {
 
-    double throughKey = 0.8;
-    double delayKey = 7 + (rand() % 10) / 10;
+    double throughKey = 0.6;
+    double delayKey = 8 + (rand() % 10) / 100;
     int randomValue = 0;
     throughKey = opti == false ? throughKey : 0.9;
-    delayKey = opti == false ? delayKey : 4 + (rand() % 10) / 10;
+    delayKey = opti == false ? delayKey : 4 + (rand() % 10) / 100;
 
     //  get packet size of each business
     vector<int> packetSize = initPacket(kind, business);
@@ -792,7 +809,7 @@ void mobilityPredict(bool opti) {
     }
     cout << endl;
 
-    ofstream throughPutFile("throughput.txt", ios::app);
+    ofstream throughPutFile("throughputFile.txt", ios::app);
     throughPutFile << endl;
     throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
     double throughPutSum = 0.000;
@@ -810,7 +827,7 @@ void mobilityPredict(bool opti) {
 //    }
 //    throughPutFile << throughPutSum << endl;
 
-
+    initMapDelayKey(kind, 1);
     ofstream delayFile("delayFile.txt", ios::app);
     delayFile << endl;
     delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
@@ -819,10 +836,10 @@ void mobilityPredict(bool opti) {
         for (int j = 0; j < business; ++j) {
             randomValue = opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-            delaySum += tmp;
-            delayFile << tmp << endl;
+            delaySum += tmp * mapDelayKey[i];
+            delayFile << tmp * mapDelayKey[i] << endl;
         }
-        delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+        delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << endl;
         delaySum = 0.000;
     }
 //    for (int i = 0; i < standardDelay.size(); i++) {
@@ -915,7 +932,7 @@ int main() {
     srand((unsigned) time(0));
     for (kind = 1; kind < 5; kind++) {
         for (business = 1; business * kind <= 30; business++) {
-            linkError(true);
+            mobilityPredict(true);
         }
     }
     return 0;
