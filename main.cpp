@@ -511,7 +511,7 @@ void routing(bool opti) {
 //        PidSizeFile << tmp << endl;
 //    }
 //    PidSizeFile << pidSizeSum << endl;
-    routingSwitch(4, 8);
+    routingSwitch(5, 8);
 }
 
 void linkError(bool opti) {
@@ -871,6 +871,7 @@ void mobilityPredict(bool opti) {
 //        PidSizeFile << tmp << endl;
 //    }
 //    PidSizeFile << pidSizeSum << endl;
+    opti == false ? routingSwitch(5, 9) : routingSwitch(1, 4);
 }
 
 bool isSwitchValid(vector<int> arr) {
@@ -891,7 +892,7 @@ vector<int> getSwitchPoint(int minCnt, int maxCnt) {
     int tmp = 0;
     for (int i = 0; i < realCnt; i++) {
         tmp = rand() % 4 + 1;
-        if (minCnt == 4) {
+        if (minCnt == 5) {
             randomValue += (rand() % 1000) + 50000 / (realCnt + tmp);
             arr[i] = randomValue;
         } else if (minCnt == 1) {
